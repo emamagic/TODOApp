@@ -20,11 +20,13 @@ class TasksViewModel @Inject constructor(
     val searchQuery = MutableStateFlow("")
     val preferencesFlow = preferencesManager.preferencesFlow
 
-    val tasks = combine(searchQuery , preferencesFlow){ searchQuery ,filterPreferences ->
+    private val tasksFlow = combine(searchQuery , preferencesFlow){ searchQuery ,filterPreferences ->
         Pair(searchQuery ,filterPreferences)
     }.flatMapLatest { (searchQuery ,filterPreferences) ->
         repository.getTasks(searchQuery ,filterPreferences.sortOrder ,filterPreferences.hideCompleted)
-    }.asLiveData()
+    }
+
+    val tasks = tasksFlow.asLiveData()
 
     fun onSortOrderSelected(sortOrder: SortOrder) = viewModelScope.launch {
         preferencesManager.updateSortOrder(sortOrder)
