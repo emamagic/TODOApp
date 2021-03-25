@@ -9,9 +9,8 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class TasksRepositoryImpl @Inject constructor(
-    private val toDoDao: ToDoDao,
-    private val errorHandler: GeneralErrorHandlerImpl
-): TasksRepository {
+    private val toDoDao: ToDoDao
+): GeneralErrorHandlerImpl() , TasksRepository {
 
     override suspend fun insertTask(task: Task) {
         toDoDao.insert(task)
@@ -26,7 +25,7 @@ class TasksRepositoryImpl @Inject constructor(
     }
 
     override fun getTasks(searchQuery: String,sortOrder: SortOrder ,hideCompleted: Boolean): Flow<ResultWrapper<List<Task>>> {
-        return toDoDao.getTasks(searchQuery ,sortOrder, hideCompleted).toResult(errorHandler)
+        return toDoDao.getTasks(searchQuery ,sortOrder, hideCompleted).toResult(this)
     }
 
 

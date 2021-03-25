@@ -8,7 +8,7 @@ import java.net.SocketException
 import java.net.UnknownHostException
 import javax.inject.Inject
 
-class GeneralErrorHandlerImpl @Inject constructor() : ErrorHandler {
+abstract class GeneralErrorHandlerImpl: ErrorHandler {
 
     override fun getError(throwable: Throwable): ErrorEntity {
         return when (throwable) {
