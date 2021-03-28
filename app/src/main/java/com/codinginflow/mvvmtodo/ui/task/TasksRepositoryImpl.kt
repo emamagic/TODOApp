@@ -28,5 +28,9 @@ class TasksRepositoryImpl @Inject constructor(
         return toDoDao.getTasks(searchQuery ,sortOrder, hideCompleted).toResult(this)
     }
 
+    override suspend fun deleteCompletedTasks() {
+        toDoDao.deleteCompletedTasks()
+    }
+
 
 }

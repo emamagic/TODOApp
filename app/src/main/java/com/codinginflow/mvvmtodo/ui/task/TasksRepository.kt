@@ -13,4 +13,6 @@ interface TasksRepository {
     suspend fun deleteTask(task: Task)
 
     fun getTasks(searchQuery: String, sortOrder: SortOrder, hideCompleted: Boolean): Flow<ResultWrapper<List<Task>>>
+
+    suspend fun deleteCompletedTasks()
 }
