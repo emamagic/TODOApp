@@ -1,4 +1,4 @@
-package com.codinginflow.mvvmtodo.ui
+package com.codinginflow.mvvmtodo.ui.task
 
 import com.codinginflow.mvvmtodo.db.entity.Task
 import com.codinginflow.mvvmtodo.safe.ResultWrapper

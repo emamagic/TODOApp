@@ -1,24 +1,30 @@
-package com.codinginflow.mvvmtodo.ui
+package com.codinginflow.mvvmtodo.ui.task
 
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.codinginflow.mvvmtodo.R
 import com.codinginflow.mvvmtodo.base.BaseFragment
 import com.codinginflow.mvvmtodo.databinding.FragmentTasksBinding
+import com.codinginflow.mvvmtodo.db.entity.Task
 import com.codinginflow.mvvmtodo.safe.ResultWrapper
 import com.codinginflow.mvvmtodo.util.Constants.MODE_TOAST_ERROR
+import com.codinginflow.mvvmtodo.util.exhaustive
 import com.codinginflow.mvvmtodo.util.onQueryTextListener
 import com.codinginflow.mvvmtodo.util.toasty
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class TasksFragment: BaseFragment<FragmentTasksBinding>() {
+class TasksFragment: BaseFragment<FragmentTasksBinding>() , TasksAdapter.OnItemClickListener {
 
     private val viewModel: TasksViewModel by viewModels()
 
@@ -30,12 +36,30 @@ class TasksFragment: BaseFragment<FragmentTasksBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val taskAdapter = TasksAdapter()
+        val taskAdapter = TasksAdapter(this)
 
         binding?.apply {
             recyclerViewTasks.apply {
                 adapter = taskAdapter
                 setHasFixedSize(true)
+            }
+            ItemTouchHelper(object: ItemTouchHelper.SimpleCallback(0 ,
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT){
+
+                override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+                    return false
+                }
+
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    val task = taskAdapter.currentList[viewHolder.adapterPosition]
+                    viewModel.onTaskSwiped(task)
+                }
+
+
+            }).attachToRecyclerView(recyclerViewTasks)
+
+            fabAddTask.setOnClickListener {
+                viewModel.onAddNewTaskClick()
             }
         }
 
@@ -43,6 +67,27 @@ class TasksFragment: BaseFragment<FragmentTasksBinding>() {
             when(result){
                 is ResultWrapper.Success -> taskAdapter.submitList(result.data)
                 is ResultWrapper.Error -> toasty("there is a problem when getting data from database" ,MODE_TOAST_ERROR)
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.tasksEvent.collect { event ->
+                when(event){
+                    is TasksViewModel.TasksEvent.ShowUndoDeleteTaskMessage -> {
+                        Snackbar.make(requireView() ,"Task deleted" ,Snackbar.LENGTH_LONG)
+                                .setAction("UNDO"){
+                                    viewModel.onUndoDeleteClick(event.task)
+                                }.show()
+                    }
+                    is TasksViewModel.TasksEvent.NavigateToAddTaskScreen -> {
+                        val action = TasksFragmentDirections.actionTasksFragmentToAddEditTaskFragment(null ,"New Task")
+                        findNavController().navigate(action)
+                    }
+                    is TasksViewModel.TasksEvent.NavigateToEditTaskScreen -> {
+                        val action = TasksFragmentDirections.actionTasksFragmentToAddEditTaskFragment(event.task ,"Edit Task")
+                        findNavController().navigate(action)
+                    }
+                }.exhaustive
             }
         }
 
@@ -89,6 +134,14 @@ class TasksFragment: BaseFragment<FragmentTasksBinding>() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onItemClick(task: Task) {
+        viewModel.onTaskSelected(task)
+    }
+
+    override fun onCheckBoxClick(task: Task, isChecked: Boolean) {
+        viewModel.onTaskCheckedChanged(task ,isChecked)
     }
 
 }

@@ -2,7 +2,7 @@ package com.codinginflow.mvvmtodo.db
 
 import androidx.room.*
 import com.codinginflow.mvvmtodo.db.entity.Task
-import com.codinginflow.mvvmtodo.ui.SortOrder
+import com.codinginflow.mvvmtodo.ui.task.SortOrder
 import kotlinx.coroutines.flow.Flow
 
 @Dao

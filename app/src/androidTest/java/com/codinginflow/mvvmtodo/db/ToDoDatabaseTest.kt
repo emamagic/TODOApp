@@ -25,9 +25,6 @@ class ToDoDatabaseTest {
     private lateinit var db: ToDoDatabase
     private lateinit var dao: ToDoDao
 
-    private val testDispatcher = TestCoroutineDispatcher()
-    private val testScope = TestCoroutineScope(testDispatcher)
-
     @get:Rule
     var instantTaskExecutorRule = InstantTaskExecutorRule()
 
@@ -37,8 +34,6 @@ class ToDoDatabaseTest {
     @Before
     fun setUp() {
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext() ,ToDoDatabase::class.java)
-                .setTransactionExecutor(testDispatcher.asExecutor())
-                .setQueryExecutor(testDispatcher.asExecutor())
                 .build()
         dao = db.getDao()
     }
@@ -50,14 +45,14 @@ class ToDoDatabaseTest {
 
     @Test
     fun insertTask() = runBlocking {
-        val task = Task("ali" ,important = false ,completed = false)
+        val task = Task("ali" ,important = false ,completed = false ,id = 1)
         val result = dao.insert(task)
         assertThat(result).isEqualTo(1)
     }
 
 //    @Test
-//    fun deleteTask() = testScope.runBlockingTest {
-//        val task = Task("ali" ,important = false ,completed = false)
+//    fun deleteTask() = runBlockingTest {
+//        val task = Task("ali" ,important = false ,completed = false ,id = 2)
 //        dao.insert(task)
 //        dao.delete(task)
 //        val result = dao.getTasks().toList()
@@ -65,13 +60,13 @@ class ToDoDatabaseTest {
 //    }
 
 
-    @Test
-    fun updateTask() = runBlockingTest {
-        val task = Task("ali" ,important = false ,completed = false)
-        val task2 = Task("reza" ,important = false ,completed = false)
-        dao.insert(task)
-        dao.update(task2)
-
-    }
+//    @Test
+//    fun updateTask() = runBlockingTest {
+//        val task = Task("ali" ,important = false ,completed = false)
+//        val task2 = Task("reza" ,important = false ,completed = false)
+//        dao.insert(task)
+//        dao.update(task2)
+//
+//    }
 
 }

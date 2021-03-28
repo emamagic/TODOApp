@@ -1,4 +1,4 @@
-package com.codinginflow.mvvmtodo.ui
+package com.codinginflow.mvvmtodo.ui.task
 
 import com.codinginflow.mvvmtodo.db.ToDoDao
 import com.codinginflow.mvvmtodo.db.entity.Task
@@ -24,7 +24,7 @@ class TasksRepositoryImpl @Inject constructor(
         toDoDao.delete(task)
     }
 
-    override fun getTasks(searchQuery: String,sortOrder: SortOrder ,hideCompleted: Boolean): Flow<ResultWrapper<List<Task>>> {
+    override fun getTasks(searchQuery: String, sortOrder: SortOrder, hideCompleted: Boolean): Flow<ResultWrapper<List<Task>>> {
         return toDoDao.getTasks(searchQuery ,sortOrder, hideCompleted).toResult(this)
     }
 
